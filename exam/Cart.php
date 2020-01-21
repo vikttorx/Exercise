@@ -47,7 +47,7 @@ if (isset($_GET["action"])){
         }
     }
 }
-//var_dump($_SESSION);
+//var_dump($_POST);
 $response = false;
 if($_POST && isset($_POST)):
 foreach ($_SESSION['cart'] as $orderitem):
@@ -57,10 +57,10 @@ foreach ($_SESSION['cart'] as $orderitem):
         $item_quantity   = $orderitem['item_quantity'];
         $product_price   = $_POST['product_price'];
         $tables_id   = $_POST['tables_id'];
-//        $reservation_id   = $_POST['reservation_id'];
-        $sql = 'INSERT INTO orders(item_name , item_quantity , product_price, tables_id) VALUES(:item_name, :item_quantity, :product_price, :tables_id )';
+        $reservation_id  = $_POST['reservation_id'];
+        $sql = 'INSERT INTO orders(item_name , item_quantity , product_price, tables_id, reservation_id) VALUES(:item_name, :item_quantity, :product_price, :tables_id , :reservation_id)';
         $statement = $con->prepare($sql);
-        $response = $statement->execute([':item_name' => $item_name, ':item_quantity' => $item_quantity, ':product_price' => $product_price, ':tables_id' => $tables_id  ]);
+        $response = $statement->execute([':item_name' => $item_name, ':item_quantity' => $item_quantity, ':product_price' => $product_price, ':tables_id' => $tables_id, ':reservation_id' => $reservation_id  ]);
 
 endforeach;
 endif;
@@ -86,6 +86,12 @@ $tables = $con->prepare("SELECT * FROM tables");
 $tables->execute();
 $tables = $tables->fetchAll(PDO::FETCH_ASSOC);
 
+$reservation = $con->prepare("SELECT * FROM reservation");
+$reservation->execute();
+$reservation = $reservation->fetchAll(PDO::FETCH_ASSOC);
+
+error_reporting(0);
+ini_set('display_errors', 0);
 
 ?>
 
@@ -154,7 +160,7 @@ $tables = $tables->fetchAll(PDO::FETCH_ASSOC);
                     <div class="product">
                         <!--                                <img src="--><?php //echo $row["image"]; ?><!--" class="img-responsive">-->
                         <h5 class="text-info"><?php echo $row["pname"]; ?></h5>
-                        <h5 class="text-danger"><?php echo $row["price"]; ?></h5>
+                        <h5 class="text-danger">&euro;<?php echo $row["price"]; ?></h5>
                         <input type="text" name="quantity" class="form-control" value="1">
                         <input type="hidden" name="hidden_name" value="<?php echo $row["pname"]; ?>">
                         <input type="hidden" name="hidden_price" value="<?php echo $row["price"]; ?>">
@@ -199,7 +205,7 @@ $tables = $tables->fetchAll(PDO::FETCH_ASSOC);
                         <td><input name="item_quantity[]" value="<?php echo $value["item_quantity"]; ?>" type="hidden"> <?php echo $value["item_quantity"]; ?></td>
                         <td><input name="product_price" value="<?php echo $value["product_price"]; ?>" type="hidden"> <?php echo $value["product_price"]; ?></td>
                         <td>
-                            $ <?php echo number_format($value["item_quantity"] * $value["product_price"], 2); ?></td>
+                            &euro; <?php echo number_format($value["item_quantity"] * $value["product_price"], 2); ?></td>
                         <td><a href="Cart.php?action=delete&id=<?php echo $value["product_id"]; ?>"><span
                                         class="text-danger">Remove Item</span></a></td>
 
@@ -211,17 +217,30 @@ $tables = $tables->fetchAll(PDO::FETCH_ASSOC);
 
                 <tr>
                     <td colspan="3" align="right">Total</td>
-                    <th align="right">$ <?php echo number_format($total, 2); ?></th>
+                    <th align="right">&euro; <?php echo number_format($total, 2); ?></th>
                     <td></td>
                 </tr>
                 <div class="form-group">
-                    <label for="name">reserveringen</label>
+                    <label for="name">Tables</label>
                     <select name="tables_id">
                         <?php
 
                         foreach($tables as $tbls)
                         {
                             echo "<option value=\"{$tbls['id']}\">{$tbls['id']} ({$tbls['description']})</option>";
+                        }
+
+                        ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="name">Reservations</label>
+                    <select name="reservation_id">
+                        <?php
+
+                        foreach($reservation as $res)
+                        {
+                            echo "<option value=\"{$res['id']}\">{$res['id']} ({$res['name']})</option>";
                         }
 
                         ?>
@@ -238,7 +257,7 @@ $tables = $tables->fetchAll(PDO::FETCH_ASSOC);
         </table>
 
     </div>
-
+<a class="nav-link" href="index.php">Back</a>
 </div>
 
 

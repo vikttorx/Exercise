@@ -31,7 +31,7 @@ $reservations = $statement->fetchAll(PDO::FETCH_OBJ);
                     <th>Time</th>
                     <th>Name</th>
                     <th>Phone</th>
-                    <th>Table </th>
+
                     <th>Action</th>
                 </tr>
                 <?php foreach($reservations as $res): ?>
@@ -41,10 +41,11 @@ $reservations = $statement->fetchAll(PDO::FETCH_OBJ);
                         <td><?= $res->time; ?></td>
                         <td><?= $res->name; ?></td>
                         <td><?= $res->phone; ?></td>
-                        <td><?= $res->tables_id; ?></td>
-                        <td>
 
-                            <a onclick="return confirm('Are you sure you want to delete this entry?')" href="pizzadelete.php?id=<?= $reservering->id ?>" class='btn btn-danger'>Delete</a>
+                        <td>
+                            <a href="editreservation.php?id=<?= $res->id ?>" class="btn btn-info">Edit</a>
+                            <a onclick="return confirm('Are you sure you want to delete this entry?')" href="deletereservation.php?id=<?= $res->id ?>" class='btn btn-danger'>Delete</a>
+                            <a href="orderbon.php?id=<?= $res->id ?>" class="btn btn-success">Print bon</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -52,5 +53,6 @@ $reservations = $statement->fetchAll(PDO::FETCH_OBJ);
         </div>
     </div>
     <a class="nav-link" href="createreservation.php">Create a reservation</a>
+    <a class="nav-link" href="index.php">Back</a>
 
 <?php require 'footer.php'; ?>
